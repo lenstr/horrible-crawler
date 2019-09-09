@@ -71,10 +71,10 @@ func main() {
 		log.Printf("[INFO] Next try at %v", nextRun)
 		<-time.After(nextRun.Sub(time.Now()))
 
-		episodeNumber, err := LatestDownloadedEpisode(dataDir)
+		latestDownloadedEpisode, err := LatestDownloadedEpisode(dataDir)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				episodeNumber = 890
+				latestDownloadedEpisode = 890
 			} else {
 				log.Printf("[ERROR] Could not get latest downloaded episode number: %v", err)
 				continue
@@ -82,23 +82,23 @@ func main() {
 		}
 
 		// try to download next episode
-		episodeNumber += 1
-		log.Printf("[INFO] Download episode %v", episodeNumber)
+		nextEpisode := latestDownloadedEpisode + 1
+		log.Printf("[INFO] Download episode %v", nextEpisode)
 
-		if err := DownloadEpisode(dataDir, OnePieceShowID, episodeNumber); err != nil {
+		if err := DownloadEpisode(dataDir, OnePieceShowID, nextEpisode); err != nil {
 			if errors.Is(err, ErrEpisodeNotFound) {
-				log.Printf("[INFO] Episode %v not found", episodeNumber)
+				log.Printf("[INFO] Episode %v not found", nextEpisode)
 			} else {
-				log.Printf("[ERROR] Failed to download episode %v: %v", episodeNumber, err)
+				log.Printf("[ERROR] Failed to download episode %v: %v", nextEpisode, err)
 			}
 			continue
 		}
-		if err := UpdateLatestDownloadedEpisode(dataDir, episodeNumber); err != nil {
-			log.Printf("[ERROR] Failed to update latest episode %v: %v", episodeNumber, err)
+		if err := UpdateLatestDownloadedEpisode(dataDir, nextEpisode); err != nil {
+			log.Printf("[ERROR] Failed to update latest episode %v: %v", nextEpisode, err)
 		}
 
-		subject := fmt.Sprintf("[Horrible Crawler] New episode of One Piece %v available for watching", episodeNumber)
-		content := fmt.Sprintf("One Piece episode %v successfully downloaded", episodeNumber)
+		subject := fmt.Sprintf("[Horrible Crawler] New episode of One Piece %v available for watching", nextEpisode)
+		content := fmt.Sprintf("One Piece episode %v successfully downloaded", nextEpisode)
 
 		log.Printf("[INFO] %v", subject)
 
