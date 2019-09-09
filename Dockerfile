@@ -4,10 +4,10 @@ WORKDIR /build/
 COPY go.* /build/
 RUN go mod download
 
-COPY main.go /build/main.go
+COPY *.go /build/
 ENV CGO_ENABLED=0
 
-RUN go build -o /bin/horrible-crawler main.go
+RUN go build -o /bin/horrible-crawler ./
 
 
 FROM alpine:latest
