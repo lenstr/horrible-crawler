@@ -35,7 +35,7 @@ func LatestDownloadedEpisode(dataDir string) (int, error) {
 }
 
 func UpdateLatestDownloadedEpisode(dataDir string, episodeNumber int) error {
-	file := path.Join(dataDir, ".latest_downloaded_episode")
+	file := path.Join(dataDir, LatestDownloadedEpisodeFilename)
 	err := ioutil.WriteFile(file, []byte(strconv.Itoa(episodeNumber)), 0644)
 	if err != nil {
 		return err
