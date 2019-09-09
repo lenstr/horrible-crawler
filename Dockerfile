@@ -11,5 +11,6 @@ RUN go build -o /bin/horrible-crawler main.go
 
 
 FROM alpine:latest
+RUN apk add tzdata
 COPY --from=builder /bin/horrible-crawler /bin/
 ENTRYPOINT /bin/horrible-crawler
