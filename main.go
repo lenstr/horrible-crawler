@@ -15,6 +15,7 @@ import (
 
 	"github.com/anacrolix/torrent"
 	"github.com/antchfx/htmlquery"
+	"github.com/robfig/cron/v3"
 )
 
 type ShowID int
@@ -172,11 +173,6 @@ func updateLatestDownloadedEpisode(dataDir string, episodeNumber int) error {
 	return nil
 }
 
-func getNextRun(now time.Time, interval time.Duration) time.Time {
-	// TODO 	nextRun := time.Date(up.Year(), up.Month(), up.Day(), up.Hour(), 0, 0, 0, up.Location())
-	return time.Now().Add(interval).Round(interval)
-}
-
 func main() {
 	apiKey := os.Getenv("SENDGRID_API_KEY")
 	if apiKey == "" {
@@ -188,20 +184,20 @@ func main() {
 		log.Fatalf("Environ variable DATA_DIR must be set")
 	}
 
-	scrapeIntervalRaw := os.Getenv("SCRAPE_INTERVAL")
-	if scrapeIntervalRaw == "" {
-		scrapeIntervalRaw = "1h"
+	scrapeSchedule := os.Getenv("SCRAPE_SCHEDULE")
+	if scrapeSchedule == "" {
+		log.Fatalf("Environment variable SCRAPE_SCHEDULE must be set")
 	}
 
 	notificationEmail := os.Getenv("NOTIFICATION_EMAIL")
 
-	scrapeInterval, err := time.ParseDuration(scrapeIntervalRaw)
+	schedule, err := cron.ParseStandard(scrapeSchedule)
 	if err != nil {
-		log.Fatalf("Eviron variable SCRAPE_INTERVAL must be of type time.Duration")
+		log.Fatalf("Failed to parse SCRAPE_SCHEDULE as a standard cron specification: %v", err)
 	}
 
 	for {
-		nextRun := getNextRun(time.Now(), scrapeInterval)
+		nextRun := schedule.Next(time.Now())
 		log.Printf("[INFO] Next try at %v", nextRun)
 		<-time.After(nextRun.Sub(time.Now()))
 
