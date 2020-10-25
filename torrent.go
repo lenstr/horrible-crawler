@@ -4,43 +4,54 @@ import (
 	"fmt"
 	"log"
 
+	"golang.org/x/net/html"
+
 	"github.com/anacrolix/torrent"
 	"github.com/antchfx/htmlquery"
 )
 
 var ErrEpisodeNotFound = fmt.Errorf("episode not found")
 
-func ShowURL(showID ShowID) string {
-	return fmt.Sprintf(`https://horriblesubs.info/api.php?method=getshows&type=show&showid=%v`, showID)
+func ShowURL(episodeNumber int) string {
+	return fmt.Sprintf(`https://nyaa.iss.one/?f=0&c=0_0&q=%%5BSubsPlease%%5D+One+Piece+-+%v+%%281080p%%29`, episodeNumber)
 }
 
-func MagnetLink(showID ShowID, episodeNumber int) (string, error) {
-	showURL := ShowURL(showID)
+func MagnetLink(episodeNumber int) (string, error) {
+	showURL := ShowURL(episodeNumber)
 	node, err := htmlquery.LoadURL(showURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to load url %q: %w", showURL, err)
 	}
 
-	episode := htmlquery.FindOne(node, fmt.Sprintf(`//*[@id="%v-1080p"]`, episodeNumber))
-	if episode == nil {
-		return "", fmt.Errorf("could not find magnet link for episode %v (1080p): %w", episodeNumber, ErrEpisodeNotFound)
+	return ExtractMagnetLink(node)
+}
+
+func ExtractMagnetLink(node *html.Node) (string, error) {
+	tbody := htmlquery.FindOne(node, "//tbody")
+	if tbody == nil {
+		return "", fmt.Errorf("tbody not found: %w", ErrEpisodeNotFound)
 	}
 
-	link := htmlquery.FindOne(episode, `//*[@class="dl-type hs-magnet-link"]`)
-	if link == nil {
-		return "", fmt.Errorf("magnet link for episode %v (1080p) not found", episodeNumber)
+	td := htmlquery.FindOne(tbody, `//td[@class="text-center"]`)
+	if td == nil {
+		return "", fmt.Errorf("td not found")
 	}
 
-	href := htmlquery.SelectAttr(link.FirstChild, "href")
+	links := htmlquery.Find(td, "//a")
+	if len(links) == 0 {
+		return "", fmt.Errorf("links not found")
+	}
+
+	href := htmlquery.SelectAttr(links[1], "href")
 	if href == "" {
-		return "", fmt.Errorf("href attribute for episode %v (1080p) is empty", episodeNumber)
+		return "", fmt.Errorf("href not found")
 	}
 
 	return href, nil
 }
 
-func DownloadEpisode(dataDir string, showID ShowID, episodeNumber int) error {
-	magnet, err := MagnetLink(showID, episodeNumber)
+func DownloadEpisode(dataDir string, episodeNumber int) error {
+	magnet, err := MagnetLink(episodeNumber)
 	if err != nil {
 		return fmt.Errorf("failed to get magnet: %w", err)
 	}

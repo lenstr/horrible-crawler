@@ -13,11 +13,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-type ShowID int
-
 const (
-	OnePieceShowID ShowID = 347
-
 	LatestDownloadedEpisodeFilename = ".latest_downloaded_episode"
 )
 
@@ -74,7 +70,7 @@ func main() {
 		latestDownloadedEpisode, err := LatestDownloadedEpisode(dataDir)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				latestDownloadedEpisode = 890
+				latestDownloadedEpisode = 943
 			} else {
 				log.Printf("[ERROR] Could not get latest downloaded episode number: %v", err)
 				continue
@@ -85,7 +81,7 @@ func main() {
 		nextEpisode := latestDownloadedEpisode + 1
 		log.Printf("[INFO] Download episode %v", nextEpisode)
 
-		if err := DownloadEpisode(dataDir, OnePieceShowID, nextEpisode); err != nil {
+		if err := DownloadEpisode(dataDir, nextEpisode); err != nil {
 			if errors.Is(err, ErrEpisodeNotFound) {
 				log.Printf("[INFO] Episode %v not found", nextEpisode)
 			} else {
