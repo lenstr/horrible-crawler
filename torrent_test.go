@@ -12,20 +12,10 @@ func TestExtractMagnetLink(t *testing.T) {
 	assert := require.New(t)
 
 	node, err := htmlquery.Parse(strings.NewReader(sampleResponse))
-
 	assert.NoError(err)
 
-	tbody := htmlquery.FindOne(node, "//tbody")
-	assert.NotNil(tbody)
-
-	td := htmlquery.FindOne(tbody, `//td[@class="text-center"]`)
-	assert.NotNil(td)
-
-	links := htmlquery.Find(td, "//a")
-	assert.NotEmpty(links)
-	assert.Len(links, 2)
-
-	href := htmlquery.SelectAttr(links[1], "href")
+	href, err := ExtractMagnetLink(node)
+	assert.NoError(err)
 
 	assert.Equal("magnet:?xt=urn:btih:9fa763e22ef55107e8a5058e9f37ff7be6a0ad69&dn=%5BSubsPlease%5D%20One%20Piece%20-%20947%20%281080p%29%20%5B1E071257%5D.mkv&tr=http%3A%2F%2Fnyaa.tracker.wf%3A7777%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce", href)
 }
