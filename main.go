@@ -40,10 +40,10 @@ func UpdateLatestDownloadedEpisode(dataDir string, episodeNumber int) error {
 }
 
 func main() {
-	apiKey := os.Getenv("SENDGRID_API_KEY")
-	if apiKey == "" {
-		log.Fatalf("[ERROR] Environ variable SENDGRID_API_KEY must be set")
-	}
+	//apiKey := os.Getenv("SENDGRID_API_KEY")
+	//if apiKey == "" {
+	//	log.Fatalf("[ERROR] Environ variable SENDGRID_API_KEY must be set")
+	//}
 
 	dataDir := os.Getenv("DATA_DIR")
 	if dataDir == "" {
@@ -55,7 +55,7 @@ func main() {
 		log.Fatalf("[ERROR] Environment variable SCRAPE_SCHEDULE must be set")
 	}
 
-	notificationEmail := os.Getenv("NOTIFICATION_EMAIL")
+	//notificationEmail := os.Getenv("NOTIFICATION_EMAIL")
 
 	schedule, err := cron.ParseStandard(scrapeSchedule)
 	if err != nil {
@@ -70,7 +70,7 @@ func main() {
 		latestDownloadedEpisode, err := LatestDownloadedEpisode(dataDir)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				latestDownloadedEpisode = 943
+				latestDownloadedEpisode = 1001
 			} else {
 				log.Printf("[ERROR] Could not get latest downloaded episode number: %v", err)
 				continue
@@ -94,15 +94,15 @@ func main() {
 		}
 
 		subject := fmt.Sprintf("[Horrible Crawler] New episode of One Piece %v available for watching", nextEpisode)
-		content := fmt.Sprintf("One Piece episode %v successfully downloaded", nextEpisode)
+		//content := fmt.Sprintf("One Piece episode %v successfully downloaded", nextEpisode)
 
 		log.Printf("[INFO] %v", subject)
 
-		if notificationEmail != "" {
-			if err := SendNotification(apiKey, notificationEmail, subject, content); err != nil {
-				fmt.Printf("[ERROR] failed to send notification: %v\n", err)
-				continue
-			}
-		}
+		//if notificationEmail != "" {
+		//	if err := SendNotification(apiKey, notificationEmail, subject, content); err != nil {
+		//		fmt.Printf("[ERROR] failed to send notification: %v\n", err)
+		//		continue
+		//	}
+		//}
 	}
 }
